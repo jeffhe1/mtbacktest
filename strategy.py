@@ -17,16 +17,21 @@ class Position:
         self.total_value = self.units * price
     
     def _add_to_curr_position(self, units:float, price:float) -> None:
+        new_units = units + self.units
+        if new_units == 0:
+            self._close_curr_position(price)
+            return
         self.avg_price = (self.units * self.avg_price + units * price)/(self.units + units)
         self.units += units
         self.unrealized_pl = (price - self.avg_price) * self.units
+        self.status='close' if self.units == 0 else 'open'
 
     def _close_curr_position(self, price:float, **kwargs) -> None:
         units = kwargs.get('close_units', self.units) # The amount of units you want to close
         self.units -= units
-        self.realized_pl = (price - self.avg_price) * units
+        self.realized_pl += (price - self.avg_price) * units
         self.avg_price = (self.units * self.avg_price) / self.units if self.units != 0 else 0
-        self.status = 'closed'
+        self.status = 'closed' if self.units == 0 else 'open'
         self._update_position(price)
     
     def _show(self):
@@ -53,6 +58,7 @@ class Portfolio:
         self.tlv = sum([pos.total_value for pos in self.positions]) + self.cash
 
     def _close_position(self, symbol:str, price:float, **kwargs) -> None:
+        
         units = kwargs.get('close_units', None)
         try:
             pos = [pos for pos in self.positions if pos.symbol == symbol][0]
@@ -61,11 +67,11 @@ class Portfolio:
         if pos.status == 'closed':
             raise ValueError('Position is already closed')
         if units is not None:
-            pos._close_curr_position(price, close_units=units)
             close_size = units * price
+            pos._close_curr_position(price, close_units=units)
         else:
+            close_size = pos.units * pos.curr_price
             pos._close_curr_position(price)
-            close_size = pos.total_value
         self.cash += close_size
         self.tlv = sum([pos.total_value for pos in self.positions]) + self.cash
     def _update_portfolio(self, prices:dict) -> None:
@@ -75,7 +81,7 @@ class Portfolio:
     def _show(self):
         for pos in self.positions:
             pos._show()
-        print(f'Cash: {self.cash},\nTotal Value: {self.tlv}\n')
+        print(f'Cash: {self.cash},\nTotal Value: {self.tlv},\n')
     
 
 class Account:
@@ -89,11 +95,12 @@ class Account:
         self.portfolio_snapshots.loc[timestamp] = portfolio
 
     def _show(self):
-        print(f'cash: {self.cash}, leverage: {self.leverage}, buying_power: {self.buying_power}')
+        print(f'cash: {self.cash}, leverage: {self.leverage}, buying_power: {self.buying_power}, snapshots: {len(self.portfolio_snapshots)}')
         curr_portfolio = self.portfolio_snapshots.iloc[-1]['portfolio']
         curr_time = self.portfolio_snapshots.index[-1]
         print(f'Timestamp: {curr_time}')
         curr_portfolio._show()
+
         print('\n')
 
 class Strategy:
@@ -101,22 +108,46 @@ class Strategy:
         initial_capital = kwargs.get('initial_capital', 100000)
         self.account = Account(initial_capital)
         portfolio = Portfolio(set(), initial_capital)
-        self.account._update_account(dt.now(), portfolio)
+        self.account._update_account(0, portfolio)
 
     def create_position(self, timestamp:float, symbol:str, units:float, price:float) -> None:
         position = Position(symbol, units, price)
         curr_portfolio = self.account.portfolio_snapshots.iloc[-1]['portfolio']
         curr_portfolio._add_position(position)
-        self.account._update_account(dt.now(), curr_portfolio)
+        self.account._update_account(timestamp, curr_portfolio)
+
+    def close_position(self, timestamp:float, symbol:str, price:float, **kwargs) -> None:
+        curr_portfolio = self.account.portfolio_snapshots.iloc[-1]['portfolio']
+        curr_portfolio._close_position(symbol, price, **kwargs)
+        self.account._update_account(timestamp, curr_portfolio)
+    
+    def update_positions(self, timestamp:float, prices:dict) -> None:
+        curr_portfolio = self.account.portfolio_snapshots.iloc[-1]['portfolio']
+        curr_portfolio._update_portfolio(prices)
+        self.account._update_account(timestamp, curr_portfolio)
+
+    def init(self):
+        pass
+    
+    def iter(self):
+        """
+        User should define this themselves by extending the strategy class,
+        this is where the user define the logic of the trading algorithm,
+        and this function would be called once each iteration of the backtest
+        iterating through the rows of data fed into the backtest framework
+        """
+        pass
 
 if __name__ == '__main__':
     demo_strat = Strategy(initial_capital=100000)
     demo_strat.account._show()
-    demo_strat.create_position(dt.now(), 'AAPL', 100, 100)
+    demo_strat.create_position(dt.now(), 'AAPL', -100, 100)
     demo_strat.account._show()
     demo_strat.create_position(dt.now(), 'TSLA', 100, 200)
     demo_strat.account._show()
-    demo_strat.create_position(dt.now(), 'AAPL', 100, 150)
+    demo_strat.create_position(dt.now(), 'AAPL', 100, 90)
     demo_strat.account._show()
-    print(demo_strat.account.buying_power)
-    print('testings')
+"""    demo_strat.close_position(dt.now(), 'AAPL', price=200, close_units=100)
+    demo_strat.account._show()
+    demo_strat.close_position(dt.now(), 'AAPL', 200)
+    demo_strat.account._show()"""
