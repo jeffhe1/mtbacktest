@@ -119,3 +119,4 @@ if __name__ == '__main__':
     demo_strat.create_position(dt.now(), 'AAPL', 100, 150)
     demo_strat.account._show()
     print(demo_strat.account.buying_power)
+    print('dingdong new feature')
