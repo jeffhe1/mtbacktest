@@ -108,3 +108,15 @@ class Strategy:
         curr_portfolio = self.account.portfolio_snapshots.iloc[-1]['portfolio']
         curr_portfolio._add_position(position)
         self.account._update_account(dt.now(), curr_portfolio)
+
+if __name__ == '__main__':
+    demo_strat = Strategy(initial_capital=100000)
+    demo_strat.account._show()
+    demo_strat.create_position(dt.now(), 'AAPL', 100, 100)
+    demo_strat.account._show()
+    demo_strat.create_position(dt.now(), 'TSLA', 100, 200)
+    demo_strat.account._show()
+    demo_strat.create_position(dt.now(), 'AAPL', 100, 150)
+    demo_strat.account._show()
+    print(demo_strat.account.buying_power)
+    print('testings')
