@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-
+from datetime import datetime as dt
 class Position:
     def __init__(self, symbol:str, units:float, price:float) -> None:
         self.symbol = symbol
@@ -79,31 +79,42 @@ class Portfolio:
     
 
 class Account:
-    def __init__(self, id:int, cash:float, portfolio:Portfolio):
-        self.id = id
-        pass
-        
+    def __init__(self, cash:float, **kwargs):
+        self.cash = cash
+        self.leverage = kwargs.get('leverage', 1)
+        self.portfolio_snapshots = kwargs.get('portfolio_snapshots', pd.DataFrame(columns=['timestamp', 'portfolio']))
+        self.buying_power = self.cash * self.leverage
+
+    def _update_account(self, timestamp:float, portfolio:Portfolio) -> None:
+        self.portfolio_snapshots.loc[timestamp] = portfolio
+
+    def _show(self):
+        print(f'cash: {self.cash}, leverage: {self.leverage}, buying_power: {self.buying_power}')
+        curr_portfolio = self.portfolio_snapshots.iloc[-1]['portfolio']
+        curr_time = self.portfolio_snapshots.index[-1]
+        print(f'Timestamp: {curr_time}')
+        curr_portfolio._show()
+        print('\n')
 
 class Strategy:
-    def __init__(self):
-        pass
+    def __init__(self, **kwargs):
+        initial_capital = kwargs.get('initial_capital', 100000)
+        self.account = Account(initial_capital)
+        portfolio = Portfolio(set(), initial_capital)
+        self.account._update_account(dt.now(), portfolio)
+
+    def create_position(self, timestamp:float, symbol:str, units:float, price:float) -> None:
+        position = Position(symbol, units, price)
+        curr_portfolio = self.account.portfolio_snapshots.iloc[-1]['portfolio']
+        curr_portfolio._add_position(position)
+        self.account._update_account(dt.now(), curr_portfolio)
 
 if __name__ == '__main__':
-    portfolio = Portfolio(set(), 100000)
-    position = Position('AAPL', 10, 100)
-    portfolio._add_position(position)
-    portfolio._add_position(Position('AAPL', 10, 110))
-    portfolio._add_position(Position('TSLA', 10, 200))
-    portfolio._show()
-    portfolio._close_position("AAPL", 95, close_units=10)
-    new_prices = {'AAPL': 90, 'TSLA': 210}
-    portfolio._update_portfolio(new_prices)
-    portfolio._show()
-    new_prices = {'AAPL': 91, 'TSLA': 215}
-    portfolio._update_portfolio(new_prices)
-    portfolio._show()
-    new_prices = {'AAPL': 91, 'TSLA': 300}
-    portfolio._update_portfolio(new_prices)
-    portfolio._show()
-    
-    
+    demo_strat = Strategy(initial_capital=100000)
+    demo_strat.account._show()
+    demo_strat.create_position(dt.now(), 'AAPL', 100, 100)
+    demo_strat.account._show()
+    demo_strat.create_position(dt.now(), 'TSLA', 100, 200)
+    demo_strat.account._show()
+    demo_strat.create_position(dt.now(), 'AAPL', 100, 150)
+    demo_strat.account._show()
