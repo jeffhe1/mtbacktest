@@ -137,17 +137,3 @@ class Strategy:
         iterating through the rows of data fed into the backtest framework
         """
         pass
-
-if __name__ == '__main__':
-    demo_strat = Strategy(initial_capital=100000)
-    demo_strat.account._show()
-    demo_strat.create_position(dt.now(), 'AAPL', -100, 100)
-    demo_strat.account._show()
-    demo_strat.create_position(dt.now(), 'TSLA', 100, 200)
-    demo_strat.account._show()
-    demo_strat.create_position(dt.now(), 'AAPL', 100, 90)
-    demo_strat.account._show()
-"""    demo_strat.close_position(dt.now(), 'AAPL', price=200, close_units=100)
-    demo_strat.account._show()
-    demo_strat.close_position(dt.now(), 'AAPL', 200)
-    demo_strat.account._show()"""
