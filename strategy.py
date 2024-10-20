@@ -58,22 +58,18 @@ class Portfolio:
         self.tlv = sum([pos.total_value for pos in self.positions]) + self.cash
 
     def _close_position(self, symbol:str, price:float, **kwargs) -> None:
-        
-        units = kwargs.get('close_units', None)
         try:
             pos = [pos for pos in self.positions if pos.symbol == symbol][0]
         except IndexError:
             raise ValueError('Position does not exist in the portfolio')
+        units = kwargs.get('close_units', pos.units)
         if pos.status == 'closed':
             raise ValueError('Position is already closed')
-        if units is not None:
-            close_size = units * price
-            pos._close_curr_position(price, close_units=units)
-        else:
-            close_size = pos.units * pos.curr_price
-            pos._close_curr_position(price)
+        close_size = units * price
+        pos._close_curr_position(price, close_units=units)
         self.cash += close_size
         self.tlv = sum([pos.total_value for pos in self.positions]) + self.cash
+
     def _update_portfolio(self, prices:dict) -> None:
         for pos in self.positions:
             pos._update_position(prices[pos.symbol])
@@ -93,6 +89,7 @@ class Account:
 
     def _update_account(self, timestamp:float, portfolio:Portfolio) -> None:
         self.portfolio_snapshots.loc[timestamp] = portfolio
+        self.cash = portfolio.cash
 
     def _show(self):
         print(f'cash: {self.cash}, leverage: {self.leverage}, buying_power: {self.buying_power}, snapshots: {len(self.portfolio_snapshots)}')
@@ -100,7 +97,6 @@ class Account:
         curr_time = self.portfolio_snapshots.index[-1]
         print(f'Timestamp: {curr_time}')
         curr_portfolio._show()
-
         print('\n')
 
 class Strategy:
@@ -113,13 +109,23 @@ class Strategy:
     def create_position(self, timestamp:float, symbol:str, units:float, price:float) -> None:
         position = Position(symbol, units, price)
         curr_portfolio = self.account.portfolio_snapshots.iloc[-1]['portfolio']
-        curr_portfolio._add_position(position)
-        self.account._update_account(timestamp, curr_portfolio)
+        try:
+            curr_portfolio._add_position(position)
+            self.account._update_account(timestamp, curr_portfolio)
+        except ValueError as e:
+            self.account._update_account(timestamp, curr_portfolio)
+            print(e)
+
 
     def close_position(self, timestamp:float, symbol:str, price:float, **kwargs) -> None:
         curr_portfolio = self.account.portfolio_snapshots.iloc[-1]['portfolio']
-        curr_portfolio._close_position(symbol, price, **kwargs)
-        self.account._update_account(timestamp, curr_portfolio)
+        try:
+            curr_portfolio._close_position(symbol, price, **kwargs)
+            self.account._update_account(timestamp, curr_portfolio)
+
+        except ValueError as e:
+            self.account._update_account(timestamp, curr_portfolio)
+            print(e)
     
     def update_positions(self, timestamp:float, prices:dict) -> None:
         curr_portfolio = self.account.portfolio_snapshots.iloc[-1]['portfolio']
@@ -129,7 +135,7 @@ class Strategy:
     def init(self):
         pass
     
-    def iter(self):
+    def iter(self, data:pd.DataFrame) -> None:
         """
         User should define this themselves by extending the strategy class,
         this is where the user define the logic of the trading algorithm,
