@@ -3,6 +3,8 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+from examples import DummyStrat, MultiTickerDummyStrat
+from lib.preprocessing import data_preprocess , df_to_dict
 class Backtest:
     def __init__(self, strategy, data, tickers):
         self.data = data
@@ -11,6 +13,7 @@ class Backtest:
         self.equity = []
         self.positions = pd.DataFrame()
         self.algo_ran = False
+
     def __prices_to_dict__(self, row):
         return {self.tickers[i]: row[f'close_{self.tickers[i]}'] for i in range(len(self.tickers))}
 
@@ -40,16 +43,46 @@ class Backtest:
         Annualized Volatility,
         Sharpe Ratio,
         Max Drawdown,
-        Sortino Ratio,
         Expectation,
         win rate,
-        avg trade length,
         """
         if not self.algo_ran:
             raise Exception("Algorithm has not been run yet")
         begin = self.data['timestamp'].iloc[0]  
         end = self.data['timestamp'].iloc[-1]
-        duration = end - begin
+        duration:pd.Timestamp = end - begin
+        cum_returns = np.array(self.equity) / self.equity[0]
+        total_returns = (self.equity[-1] / self.equity[0] - 1)
+        days = duration.days
+        annualized_return = ((self.equity[-1] / self.equity[0]) ** (365/days) - 1)
+        annualized_volatility = np.std(cum_returns) * np.sqrt(252)
+        sharpe_ratio = (annualized_return - 0.004) / annualized_volatility
+        max_drawdown = np.min((np.minimum.accumulate(self.equity) - self.equity)/self.equity[0])
+        expectation = (self.positions['realized_pl'].mean())
+        win_rate = sum(self.positions['realized_pl'] > 0) / len(self.positions)
+        
+        temp = self.data
+        temp['total_prices'] = temp.apply(lambda x: sum([x[f'close_{ticker}'] for ticker in self.tickers]), axis=1)
+        total_prices = np.array(temp['total_prices'])
+        cum_benchmark_returns = np.array(total_prices) / total_prices[0]
+        benchmark_total_returns = total_prices[-1] / total_prices[0] - 1
+        benchmark_annualized_return = ((total_prices[-1] / total_prices[0]) ** (365/days) - 1)
+        benchmark_annualzied_volatility = (np.std(cum_benchmark_returns) * np.sqrt(252))
+        benchmark_sharpe_ratio = (benchmark_annualized_return - 0.004) / benchmark_annualzied_volatility
+        benchmark_max_drawdown = np.min((np.minimum.accumulate(total_prices) - total_prices)/total_prices[0])
+
+        
+        return pd.DataFrame({
+            'begin': pd.Series([begin, begin]),
+            'end': pd.Series([end, end]),
+            'duration': pd.Series([duration, duration]),
+            'Total Return': pd.Series([total_returns, benchmark_total_returns]),
+            'Annualized Return': pd.Series([annualized_return, benchmark_annualized_return]),
+            'Annualized Volatility': pd.Series([annualized_volatility, benchmark_annualzied_volatility]),
+            'Sharpe Ratio': pd.Series([sharpe_ratio, benchmark_sharpe_ratio]),
+            'Max Drawdown': pd.Series([max_drawdown, benchmark_max_drawdown]),
+            'Expectation': pd.Series([expectation, None]),
+            'Win Rate': pd.Series([win_rate, None])}).set_axis(['Strategy', 'Benchmark'], axis=0)
         
     
     def plot(self):
@@ -75,4 +108,16 @@ class Backtest:
                 row=3, col=1
             )
         fig.show()
-    
+if __name__ == '__main__':
+    data = pd.read_json('test_data1.json')
+    data2 = pd.read_json('test_data2.json')
+    data['dreturn'] = ((data['close'] - data['open'])/data['open']) * 100
+    data2['dreturn'] = ((data2['close'] - data2['open'])/data2['open']) * 100
+    data.rename(columns={'date': 'timestamp'}, inplace=True)
+    data2.rename(columns={'date': 'timestamp'}, inplace=True)
+    data = data_preprocess(df_to_dict([data, data2], ['TSLA', 'AAPL']))
+    data = data.iloc[-100:]
+    bt = Backtest(MultiTickerDummyStrat, data, ['TSLA'])
+    bt.run(verbose=1)
+    perf = bt.performance()
+    print(perf)

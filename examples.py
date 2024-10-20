@@ -1,5 +1,4 @@
 from strategy import Strategy
-from backtest import Backtest
 from lib.preprocessing import df_to_dict, data_preprocess
 import pandas as pd
 import numpy as np
