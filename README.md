@@ -24,6 +24,9 @@ class MultiTickerDummyStrat():
         self.signal_func= signal
     
     def iter(self, data, ticker):
+        """
+        You must define an iter() method that takes in data and ticker (only 1 ticker) for 1 iteration of algorithm on 1 ticker
+        """
         curr_signal = self.signal_func(data['dreturn_' + ticker])
         units = (self.account.buying_power // 3)/data['close_' + ticker]
         curr_portfolio = self.account.portfolio_snapshots.iloc[-1]['portfolio']
