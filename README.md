@@ -1,12 +1,19 @@
 # Backtest
 Custom backtest framework
+
 An example multi-ticker strategy (long short)
+
 ```python
 class MultiTickerDummyStrat():
     def __init__(self):
         self.strategy = Strategy()
         self.account = self.strategy.account
         def signal(dreturn):
+            """
+            Define the signal such that if the current day return is greater than 2% we open long position,
+            and vice versa, this is performed on all tickers passed into the iter function, which runs, 1 iteration
+            of the algorithm
+            """
             if dreturn > 2:
                 return 1
             if dreturn < -2:
@@ -38,5 +45,4 @@ class MultiTickerDummyStrat():
             We close position
             '''
             self.strategy.close_position(data['timestamp'], ticker, data['close_'+ticker])
-
 ```
