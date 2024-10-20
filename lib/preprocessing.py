@@ -16,11 +16,12 @@ def data_preprocess(data:dict, **kwargs) -> tuple[list, pd.DataFrame]:
         
         df = data[f'{tickers[0]}'].add_suffix('_'+tickers[0])
         try:
-            df.rename(columns={'date_'+tickers[0]: 'timestamp_'+tickers[0]}, inplace=True)
+            df.rename(columns={'date_'+tickers[0]: 'timestamp'}, inplace=True)
         except:
             pass
         return df.dropna()
     df = pd.merge(*dataframes, on='date', how='outer', suffixes=['_'+s for s in tickers])
+    df.rename(columns={'date': 'timestamp'}, inplace=True)
     return df.dropna()
 
 def df_to_dict(dataframes:list[pd.DataFrame] | pd.DataFrame, tickers:list[str]) -> dict:

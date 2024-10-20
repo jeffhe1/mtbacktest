@@ -79,6 +79,11 @@ class Portfolio:
             pos._show()
         print(f'Cash: {self.cash},\nTotal Value: {self.tlv},\n')
     
+    def positions_to_df(self, timestamp):
+        positions = []
+        for pos in self.positions:
+            positions.append({'timestamp': timestamp, 'symbol': pos.symbol, 'units': pos.units, 'avg_price': pos.avg_price, 'curr_price': pos.curr_price, 'unrealized_pl': pos.unrealized_pl, 'realized_pl': pos.realized_pl, 'status': pos.status, 'total_value': pos.total_value})
+        return pd.DataFrame(positions)
 
 class Account:
     def __init__(self, cash:float, **kwargs):
@@ -90,7 +95,7 @@ class Account:
     def _update_account(self, timestamp:float, portfolio:Portfolio) -> None:
         self.portfolio_snapshots.loc[timestamp] = portfolio
         self.cash = portfolio.cash
-
+        self.buying_power = self.cash * self.leverage
     def _show(self):
         print(f'cash: {self.cash}, leverage: {self.leverage}, buying_power: {self.buying_power}, snapshots: {len(self.portfolio_snapshots)}')
         curr_portfolio = self.portfolio_snapshots.iloc[-1]['portfolio']
