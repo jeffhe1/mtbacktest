@@ -96,6 +96,10 @@ class Account:
         self.portfolio_snapshots.loc[timestamp] = portfolio
         self.cash = portfolio.cash
         self.buying_power = self.cash * self.leverage
+    
+    def get_curr_portfolio(self) -> Portfolio:
+        return self.portfolio_snapshots.iloc[-1]['portfolio']
+
     def _show(self):
         print(f'cash: {self.cash}, leverage: {self.leverage}, buying_power: {self.buying_power}, snapshots: {len(self.portfolio_snapshots)}')
         curr_portfolio = self.portfolio_snapshots.iloc[-1]['portfolio']

@@ -18,12 +18,12 @@ class Backtest:
             for ticker in self.tickers:
                 self.strategy.iter(row, ticker) # if multiple tickers, we pass the data for each ticker
             prices = self.__prices_to_dict__(row)
-            self.strategy.strategy.update_positions(row[f'timestamp'], prices)
-            curr_portfolio = self.strategy.strategy.account.portfolio_snapshots.iloc[-1]['portfolio']
+            self.strategy.trader.update_positions(row[f'timestamp'], prices)
+            curr_portfolio = self.strategy.trader.account.portfolio_snapshots.iloc[-1]['portfolio']
             self.equity.append(curr_portfolio.tlv)
             self.positions = pd.concat([self.positions, curr_portfolio.positions_to_df(row[f'timestamp'])], axis=0)
             if verbose:
-                self.strategy.strategy.account._show()
+                self.strategy.trader.account._show()
     
     def plot(self):
         fig = make_subplots(rows=3, cols=1, shared_xaxes=True, vertical_spacing=0.02)

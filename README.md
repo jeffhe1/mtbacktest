@@ -1,13 +1,15 @@
 # Backtest
 Custom backtest framework
 
-An example multi-ticker strategy (long short)
+To back test your strategy using this frame work we first define the strategy you want to run,
+
+An example multi-ticker strategy (long short), the custom strategy class must contain a self.trader attribute for the framework to run
 
 ```python
 class MultiTickerDummyStrat():
     def __init__(self):
-        self.strategy = Strategy()
-        self.account = self.strategy.account
+        self.trader = Strategy() # A virtual trader that you can submit orders and contains information about the portfolio it manages, you MUST DEFINE THIS AS 'self.trader'
+        self.account = self.trader.account
         def signal(dreturn):
             """
             Define the signal such that if the current day return is greater than 2% we open long position,
@@ -31,18 +33,46 @@ class MultiTickerDummyStrat():
             We long equity
             '''
             if len(open_positions) == 0:
-                self.strategy.create_position(data['timestamp'], ticker, units, data['close_'+ticker])
+                self.trader.create_position(data['timestamp'], ticker, units, data['close_'+ticker])
         
         elif curr_signal == -1:
             '''
             We short equity
             '''
             if len(open_positions) == 0:
-                self.strategy.create_position(data['timestamp'], ticker, -units, data['close_'+ticker])
+                self.trader.create_position(data['timestamp'], ticker, -units, data['close_'+ticker])
 
         elif curr_signal == 0 and len(open_positions) > 0:
             '''
             We close position
             '''
-            self.strategy.close_position(data['timestamp'], ticker, data['close_'+ticker])
+            self.trader.close_position(data['timestamp'], ticker, data['close_'+ticker])
+```
+
+Then you can backtest the strategy like the following,
+
+```python
+from strategy import Strategy
+from backtest import Backtest
+from lib.preprocessing import df_to_dict, data_preprocess
+import pandas as pd
+import numpy as np
+
+data = pd.read_json('test_data1.json')
+data2 = pd.read_json('test_data2.json')
+
+# Define your own custom features
+data['dreturn'] = ((data['close'] - data['open'])/data['open']) * 100
+data2['dreturn'] = ((data2['close'] - data2['open'])/data2['open']) * 100
+data2 = data2.iloc[-100:]
+data = data.iloc[-100:]
+
+# standardise data for passing into the backtester
+data = df_to_dict([data, data2], ['AAPL', 'TSLA']) # dataframe order should align with ticker list order
+data = data_preprocess(data)
+
+# Initiate backtest
+bt = Backtest(MultiTickerDummyStrat, data, ['AAPL', 'TSLA'])
+bt.run(verbose=False)
+bt.plot()
 ```
