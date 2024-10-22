@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-import requests
 
 def data_preprocess(data:dict, **kwargs) -> tuple[list, pd.DataFrame]:
     """
