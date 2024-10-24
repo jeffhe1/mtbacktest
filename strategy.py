@@ -1,6 +1,4 @@
-import numpy as np
 import pandas as pd
-from datetime import datetime as dt
 class Position:
     def __init__(self, symbol:str, units:float, price:float) -> None:
         self.symbol = symbol
@@ -11,6 +9,7 @@ class Position:
         self.realized_pl = 0
         self.status = 'open'
         self.total_value = self.units * self.avg_price
+
     def _update_position(self, price:float) -> None:
         self.curr_price = price
         self.unrealized_pl = (self.curr_price - self.avg_price) * self.units
@@ -38,10 +37,12 @@ class Position:
         print(f'symbol: {self.symbol}, units: {self.units}, avg_price: {self.avg_price}, curr_price: {self.curr_price}, unrealized_pl: {self.unrealized_pl}, realized_pl: {self.realized_pl}, status: {self.status}, tlv:{self.total_value}')
 
 class Portfolio:
+
     def __init__(self, positions: set[Position], cash:float):
         self.positions = positions # Note: Positions can be empty
         self.cash = cash # Cash must be initiated by a upper level class method
         self.tlv = sum([pos.total_value for pos in self.positions]) + self.cash
+
     def _add_position(self, position: Position) -> None:
         dup_pos = [pos for pos in self.positions if pos.symbol == position.symbol]
         cost = position.units * position.avg_price
@@ -74,6 +75,7 @@ class Portfolio:
         for pos in self.positions:
             pos._update_position(prices[pos.symbol])
         self.tlv = sum([pos.total_value for pos in self.positions]) + self.cash
+
     def _show(self):
         for pos in self.positions:
             pos._show()
@@ -86,6 +88,7 @@ class Portfolio:
         return pd.DataFrame(positions)
 
 class Account:
+
     def __init__(self, cash:float, **kwargs):
         self.cash = cash
         self.leverage = kwargs.get('leverage', 1)
@@ -109,6 +112,7 @@ class Account:
         print('\n')
 
 class Strategy:
+
     def __init__(self, **kwargs):
         initial_capital = kwargs.get('initial_capital', 100000)
         self.account = Account(initial_capital)
