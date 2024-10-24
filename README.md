@@ -76,6 +76,6 @@ data = data_preprocess(data)
 
 # Initiate backtest
 bt = Backtest(MultiTickerDummyStrat, data, ['AAPL', 'TSLA'])
-bt.run(verbose=False)
+bt.run(verbose=1)
 bt.plot()
 ```
