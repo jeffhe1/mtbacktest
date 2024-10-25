@@ -52,7 +52,7 @@ class MultiTickerDummyStrat():
             self.trader.close_position(data['timestamp'], ticker, data['close_'+ticker])
 ```
 
-Then you can backtest the strategy like the following,
+Then you can backtest the strategy like the following, if you choose to bring your own data
 
 ```python
 from strategy import Strategy
