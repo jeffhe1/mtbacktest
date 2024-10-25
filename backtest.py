@@ -26,6 +26,9 @@ class Backtest:
             prices = self.__prices_to_dict__(row)
             self.strategy.trader.update_positions(row[f'timestamp'], prices)
             curr_portfolio = self.strategy.trader.account.portfolio_snapshots.iloc[-1]['portfolio']
+            if curr_portfolio.tlv < 1:
+                self.equity.append(0)
+                continue      
             self.equity.append(curr_portfolio.tlv)
             self.positions = pd.concat([self.positions, curr_portfolio.positions_to_df(row[f'timestamp'])], axis=0)
             if verbose == 2:
@@ -108,16 +111,3 @@ class Backtest:
                 row=3, col=1
             )
         fig.show()
-if __name__ == '__main__':
-    data = pd.read_json('test_data1.json')
-    data2 = pd.read_json('test_data2.json')
-    data['dreturn'] = ((data['close'] - data['open'])/data['open']) * 100
-    data2['dreturn'] = ((data2['close'] - data2['open'])/data2['open']) * 100
-    data.rename(columns={'date': 'timestamp'}, inplace=True)
-    data2.rename(columns={'date': 'timestamp'}, inplace=True)
-    data = data_preprocess(df_to_dict([data, data2], ['TSLA', 'AAPL']))
-    data = data.iloc[-100:]
-    bt = Backtest(MultiTickerDummyStrat, data, ['TSLA'])
-    bt.run(verbose=1)
-    perf = bt.performance()
-    print(perf)
