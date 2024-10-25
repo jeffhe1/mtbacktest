@@ -2,10 +2,14 @@
 *tempCodeRunnerFile.py
 /lib/tempCodeRunnerFile.py
 
+# ignore ./test/test.ipynb
+/test/test.ipynb
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 lib/__pycache__
+
 # C extensions
 *.so
 
