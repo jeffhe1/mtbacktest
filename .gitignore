@@ -1,11 +1,11 @@
 # ignore tempCodeRunnerFile.py
-tempCodeRunnerFile.py
-
+*tempCodeRunnerFile.py
+/lib/tempCodeRunnerFile.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-
+lib/__pycache__
 # C extensions
 *.so
 
