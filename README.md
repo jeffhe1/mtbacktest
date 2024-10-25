@@ -52,7 +52,7 @@ class MultiTickerDummyStrat():
             self.trader.close_position(data['timestamp'], ticker, data['close_'+ticker])
 ```
 
-Then you can backtest the strategy like the following,
+Then you can backtest the strategy like the following, if you choose to bring your own data
 
 ```python
 from strategy import Strategy
@@ -76,6 +76,23 @@ data = data_preprocess(data)
 
 # Initiate backtest
 bt = Backtest(MultiTickerDummyStrat, data, ['AAPL', 'TSLA'])
-bt.run(verbose=False)
+bt.run(verbose=1)
 bt.plot()
 ```
+<<<<<<< HEAD
+=======
+
+The library also supports data fetching utilities, you can fetch data for stocks traded on US exchanges and LSE as well as crypto, note that when requesting for crypto data you should add "-USD" as suffix, for example, "BTC-USD", "SOL-USD", are accepted tickers.
+
+An example of usage of the data collection utility is,
+
+```python
+from data import Data
+client = Data()
+daily_data = client.get_daily_data(['AAPL', 'TSLA']) # for daily data
+# The accepted intervals are 1m, 5m, 1h for intraday requests
+intraday_data = client.get_intraday_data(['AAPL', 'TSLA'], interval='5m') # for intraday data
+```
+
+The data requested from the data module will be already standardised for parsing into the backtester, so no further processing is required, however, you will need to engineer your own feature if required, for future updates, we will implement a function to assist feature engineering.
+>>>>>>> test

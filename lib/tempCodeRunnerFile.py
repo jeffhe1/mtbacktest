@@ -1,1 +1,1 @@
-np.ones(100), st
+code
