@@ -16,9 +16,14 @@ def data_preprocess(data:dict, **kwargs) -> tuple[list, pd.DataFrame]:
         try:
             df.rename(columns={'date_'+tickers[0]: 'timestamp'}, inplace=True)
         except:
-            df.rename(columns={'timestamp'+tickers[0]: 'timestamp'}, inplace=True)
+            df.rename(columns={'timestamp_'+tickers[0]: 'timestamp'}, inplace=True)
         return df.dropna()
-    
+    else:
+        for df in dataframes:
+            try:
+                df.rename(columns={'date': 'timestamp'}, inplace=True)
+            except:
+                pass
     df = pd.merge(*dataframes, on='timestamp', how='outer', suffixes=['_'+s for s in tickers])
 
     return df.dropna()
@@ -28,3 +33,16 @@ def df_to_dict(dataframes:list[pd.DataFrame], tickers:list[str]) -> dict:
         return {tickers[0]: dataframes}
     return {tickers[i]: dataframes[i] for i in range(len(dataframes))}
 
+def adjust_price(df:pd.DataFrame) -> pd.DataFrame:
+    """
+    The data frame passed in must have
+    'open', 'high', 'low', 'close', 'volume', 'adjusted_close'
+    """
+    adjust_factor = df['adjusted_close'] / df['close']
+    df['close'] = df['adjusted_close']
+    df['open'] = df['open'] * adjust_factor
+    df['high'] = df['high'] * adjust_factor
+    df['low'] = df['low'] * adjust_factor
+    df['volume'] = df['volume'] * adjust_factor
+    df.drop('adjusted_close', axis=1, inplace=True)
+    return df
