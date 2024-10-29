@@ -56,9 +56,9 @@ class MultiTickerDummyStrat():
 Then you can backtest the strategy like the following, if you choose to bring your own data
 
 ```python
-from strategy import Strategy
-from backtest import Backtest
-from lib.preprocessing import df_to_dict, data_preprocess
+from mtbacktest.strategy import Strategy
+from mtbacktest.backtest import Backtest
+from mtbacktest.lib.preprocessing import df_to_dict, data_preprocess
 import pandas as pd
 import numpy as np
 
@@ -88,7 +88,7 @@ The library also supports data fetching utilities, you can fetch data for stocks
 An example of usage of the data collection utility is,
 
 ```python
-from data import Data
+from mtbacktest.data import Data
 client = Data()
 daily_data = client.get_daily_data(['AAPL', 'TSLA']) # for daily data
 # The accepted intervals are 1m, 5m, 1h for intraday requests

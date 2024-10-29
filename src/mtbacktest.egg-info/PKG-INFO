@@ -1,9 +1,9 @@
 Metadata-Version: 2.1
 Name: mtbacktest
-Version: 0.0.9
+Version: 0.0.10
 Summary: A packaged designed for backtesting single and multi ticker strategies
 Author-email: Jiajian He <2211054370abc@gmail.com>
-Project-URL: Homepage, https://github.com/jeffhe1/Backtest
+Project-URL: Homepage, https://github.com/jeffhe1/mtbacktest
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
@@ -12,6 +12,7 @@ Description-Content-Type: text/markdown
 License-File: LICENSE
 
 # Backtest
+
 Custom backtest framework
 
 To back test your strategy using this frame work we first define the strategy you want to run,
@@ -92,8 +93,8 @@ bt = Backtest(MultiTickerDummyStrat, data, ['AAPL', 'TSLA'])
 bt.run(verbose=1)
 bt.plot()
 ```
-<<<<<<< HEAD
-=======
+
+
 
 The library also supports data fetching utilities, you can fetch data for stocks traded on US exchanges and LSE as well as crypto, note that when requesting for crypto data you should add "-USD" as suffix, for example, "BTC-USD", "SOL-USD", are accepted tickers.
 
@@ -108,4 +109,3 @@ intraday_data = client.get_intraday_data(['AAPL', 'TSLA'], interval='5m') # for 
 ```
 
 The data requested from the data module will be already standardised for parsing into the backtester, so no further processing is required, however, you will need to engineer your own feature if required, for future updates, we will implement a function to assist feature engineering.
->>>>>>> test
