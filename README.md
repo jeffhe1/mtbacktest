@@ -2,6 +2,13 @@
 
 Custom backtest framework
 
+installation
+
+```python
+pip install mtbacktest
+```
+
+
 To back test your strategy using this frame work we first define the strategy you want to run,
 
 An example multi-ticker strategy (long short), the custom strategy class must contain a self.trader attribute for the framework to run
