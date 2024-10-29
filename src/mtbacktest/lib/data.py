@@ -1,7 +1,7 @@
 import requests
 import pandas as pd
 from datetime import datetime as dt
-from preprocessing import df_to_dict, data_preprocess, adjust_price
+from lib.preprocessing import df_to_dict, data_preprocess, adjust_price
 class Data:
     def __init__(self, api_token='667822cc36e777.79338265', fmt='json'):
         """
@@ -11,7 +11,6 @@ class Data:
         """
         self.api_token = api_token
         self.fmt = fmt
-        self.exchange_codes = pd.read_csv('lib/exchange_codes.csv')['Code']
     
     def __get_max_period__(self, interval:str) -> int:
         if interval == '1m':
