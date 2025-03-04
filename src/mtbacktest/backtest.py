@@ -19,6 +19,7 @@ class Backtest:
     def run(self, verbose=0):
         if verbose == 1:
             print(f'Trading {len(self.data)} instances...')
+            print(self.tickers)
         for index, row in self.data.iterrows():
             self.strategy.iter(row, self.tickers)
             prices = self.__prices_to_dict__(row)
