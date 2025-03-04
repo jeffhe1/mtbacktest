@@ -102,6 +102,9 @@ class Account:
     
     def get_curr_portfolio(self) -> Portfolio:
         return self.portfolio_snapshots.iloc[-1]['portfolio']
+    
+    def get_open_positions(self) -> list[Position]:
+        return [pos for pos in self.portfolio_snapshots.iloc[-1]['portfolio'].positions if pos.status == 'open']
 
     def _show(self):
         print(f'cash: {self.cash}, leverage: {self.leverage}, buying_power: {self.buying_power}, snapshots: {len(self.portfolio_snapshots)}')

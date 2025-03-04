@@ -25,20 +25,20 @@ class DummyStrat():
             We long equity
             '''
             if len(open_positions) == 0:
-                self.trader.create_position(data['timestamp_AAPL'], 'AAPL', units, data['close_AAPL'])
+                self.trader.create_position(data['timestamp'], 'AAPL', units, data['close_AAPL'])
         
         elif curr_signal == -1:
             '''
             We short equity
             '''
             if len(open_positions) == 0:
-                self.trader.create_position(data['timestamp_AAPL'], 'AAPL', -units, data['close_AAPL'])
+                self.trader.create_position(data['timestamp'], 'AAPL', -units, data['close_AAPL'])
 
         elif curr_signal == 0 and len(open_positions) > 0:
             '''
             We close position
             '''
-            self.trader.close_position(data['timestamp_AAPL'], 'AAPL', data['close_AAPL'])
+            self.trader.close_position(data['timestamp'], 'AAPL', data['close_AAPL'])
 class MultiTickerDummyStrat():
     def __init__(self):
         self.trader = Strategy()

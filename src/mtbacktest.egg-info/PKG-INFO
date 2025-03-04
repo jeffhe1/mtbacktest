@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: mtbacktest
-Version: 0.0.11
+Version: 0.0.17
 Summary: A packaged designed for backtesting single and multi ticker strategies
 Author-email: Jiajian He <2211054370abc@gmail.com>
 Project-URL: Homepage, https://github.com/jeffhe1/mtbacktest
@@ -14,6 +14,13 @@ License-File: LICENSE
 # Backtest
 
 Custom backtest framework
+
+installation
+
+```python
+pip install mtbacktest
+```
+
 
 To back test your strategy using this frame work we first define the strategy you want to run,
 

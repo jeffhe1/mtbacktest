@@ -12,14 +12,15 @@ class Backtest:
         self.algo_ran = False
 
     def __prices_to_dict__(self, row):
+        if type(self.tickers) == str:
+            return {self.tickers: row[f'close_{self.tickers}']}
         return {self.tickers[i]: row[f'close_{self.tickers[i]}'] for i in range(len(self.tickers))}
 
     def run(self, verbose=0):
         if verbose == 1:
             print(f'Trading {len(self.data)} instances...')
         for index, row in self.data.iterrows():
-            for ticker in self.tickers:
-                self.strategy.iter(row, ticker) # if multiple tickers, we pass the data for each ticker
+            self.strategy.iter(row, self.tickers)
             prices = self.__prices_to_dict__(row)
             self.strategy.trader.update_positions(row[f'timestamp'], prices)
             curr_portfolio = self.strategy.trader.account.portfolio_snapshots.iloc[-1]['portfolio']
@@ -48,6 +49,7 @@ class Backtest:
         """
         if not self.algo_ran:
             raise Exception("Algorithm has not been run yet")
+        self.data['timestamp'] = pd.to_datetime(self.data['timestamp'])
         begin = self.data['timestamp'].iloc[0]  
         end = self.data['timestamp'].iloc[-1]
         duration:pd.Timestamp = end - begin
@@ -89,14 +91,19 @@ class Backtest:
         if not self.algo_ran:
             raise Exception("Algorithm has not been run yet")
         fig = make_subplots(rows=3, cols=1, shared_xaxes=True, vertical_spacing=0.02)
-        for ticker in self.tickers:
-            cum_return = (1 + (self.data['close_' + ticker] - self.data['open_' + ticker])/self.data['open_' + ticker]).cumprod()
+        if type(self.tickers) == str:
             fig.add_trace(
-                go.Scatter(x=self.data['timestamp'], y=cum_return, mode='lines', name=f'{ticker} Cumulative Returns'),
+                go.Scatter(x=self.data['timestamp'], y=self.data['close_' + self.tickers], mode='lines', name=f'{self.tickers} Prices'),
                 row=1, col=1
             )
+        else:
+            for ticker in self.tickers:
+                cum_return = (1 + (self.data['close_' + ticker] - self.data['open_' + ticker])/self.data['open_' + ticker]).cumprod()
+                fig.add_trace(
+                    go.Scatter(x=self.data['timestamp'], y=cum_return, mode='lines', name=f'{ticker} Cumulative Returns'),
+                    row=1, col=1
+                )
 
-        
         fig.add_trace(
             go.Scatter(x=self.data[f'timestamp'], y=self.equity, mode='lines', name='Equity'),
             row=2, col=1
