@@ -14,6 +14,7 @@ To back test your strategy using this frame work we first define the strategy yo
 An example multi-ticker strategy (long short), the custom strategy class must contain a self.trader attribute for the framework to run
 
 ```python
+import mtbacktest.strategy import Strategy
 class MultiTickerDummyStrat():
     def __init__(self):
         self.trader = Strategy() # A virtual trader that you can submit orders and contains information about the portfolio it manages, you MUST DEFINE THIS AS 'self.trader'
@@ -63,7 +64,6 @@ class MultiTickerDummyStrat():
 Then you can backtest the strategy like the following, if you choose to bring your own data
 
 ```python
-from mtbacktest.strategy import Strategy
 from mtbacktest.backtest import Backtest
 from mtbacktest.lib.preprocessing import df_to_dict, data_preprocess
 import pandas as pd
