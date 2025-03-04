@@ -63,7 +63,6 @@ class MultiTickerDummyStrat():
 Then you can backtest the strategy like the following, if you choose to bring your own data
 
 ```python
-from mtbacktest.strategy import Strategy
 from mtbacktest.backtest import Backtest
 from mtbacktest.lib.preprocessing import df_to_dict, data_preprocess
 import pandas as pd
