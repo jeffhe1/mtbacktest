@@ -1,9 +1,17 @@
 import requests
 import pandas as pd
 from datetime import datetime as dt
-from lib.preprocessing import df_to_dict, data_preprocess, adjust_price
+from preprocessing import df_to_dict, data_preprocess, adjust_price
+from dotenv import load_dotenv
+import os
+from os.path import join, dirname
+
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
+API_KEY = os.environ.get('API_KEY')
+
 class Data:
-    def __init__(self, api_token='667822cc36e777.79338265', fmt='json'):
+    def __init__(self, api_token=API_KEY, fmt='json'):
         """
         symbols: can be 1 or multiple tickers
         interval, 1m, 5m, 1h, D
