@@ -1,7 +1,7 @@
 import requests
 import pandas as pd
 from datetime import datetime as dt
-from lib.preprocessing import df_to_dict, data_preprocess, adjust_price
+from mtbacktest.lib.preprocessing import df_to_dict, data_preprocess, adjust_price
 class Data:
     def __init__(self, fmt='json'):
         """

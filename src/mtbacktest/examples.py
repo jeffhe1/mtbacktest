@@ -1,4 +1,4 @@
-from strategy import Strategy
+from mtbacktest.strategy import Strategy
 class DummyStrat():
     def __init__(self):
         self.trader = Strategy()
