@@ -73,7 +73,6 @@ class Backtest:
         benchmark_annualzied_volatility = (np.std(cum_benchmark_returns) * np.sqrt(252))
         benchmark_sharpe_ratio = (benchmark_annualized_return - 0.004) / benchmark_annualzied_volatility
         benchmark_max_drawdown = np.min((np.minimum.accumulate(total_prices) - total_prices)/total_prices[0])
-
         
         return pd.DataFrame({
             'begin': pd.Series([begin, begin]),
@@ -109,6 +108,7 @@ class Backtest:
             go.Scatter(x=self.data[f'timestamp'], y=self.equity, mode='lines', name='Equity'),
             row=2, col=1
         )
+        
         grouped = self.positions.groupby('symbol')
         for name, group in grouped:
             fig.add_trace(

@@ -11,6 +11,7 @@ def data_preprocess(data:dict, **kwargs) -> tuple[list, pd.DataFrame]:
     """
     tickers = list(data.keys())
     dataframes = list(data.values())
+
     if len(dataframes) == 1:
         df = data[f'{tickers[0]}'][0].add_suffix('_'+tickers[0])
         try:
@@ -20,15 +21,19 @@ def data_preprocess(data:dict, **kwargs) -> tuple[list, pd.DataFrame]:
         df['timestamp'] = pd.to_datetime(df['timestamp'])
         return df.dropna()
     else:
-        for df in dataframes:
+        final_dfs = []
+        for key in tickers:
+            df = data[key]
+            df = df.add_suffix('_'+key)
             try:
-                df.rename(columns={'date': 'timestamp'}, inplace=True)
+                df.rename(columns={'date_'+key: 'timestamp'}, inplace=True)
             except:
                 pass
-    df = pd.merge(*dataframes, on='timestamp', how='outer', suffixes=['_'+s for s in tickers])
-    df['timestamp'] = pd.to_datetime(df['timestamp'])
-    print(df['timestamp'].dtype)
-    return df.dropna()
+            final_dfs.append(df)
+        ret_df = final_dfs[0]
+        for df in final_dfs[1:]:
+            ret_df = ret_df.merge(df, on='timestamp', how='outer')       
+    return ret_df.dropna()
 
 def df_to_dict(dataframes:list[pd.DataFrame], tickers:list[str]) -> dict:
     if len(tickers) == 1:
